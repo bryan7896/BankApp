@@ -7,7 +7,6 @@ import java.security.KeyStore
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 
-// --- manejo de keystore para la clave de cifrado ---
 
 object KeystoreManager {
 

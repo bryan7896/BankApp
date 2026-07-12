@@ -40,9 +40,7 @@ class SessionManager(private val context: Context) {
         Log.d("Session", "---s2---")
     }
 
-    /**
-     * Guarda la sesion
-     */
+
     fun saveSession(session: Session) {
         Log.d("Session", "---saave 3---")
         
@@ -59,9 +57,7 @@ class SessionManager(private val context: Context) {
         Log.d("Session", "--- sesion saved ${session.userName}")
     }
 
-    /**
-     * Obtiene la sesion guardada
-     */
+
     fun getSession(): Session? {
         Log.d("Session", "---s5---")
         
