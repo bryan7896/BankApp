@@ -1,7 +1,5 @@
 package com.bankapp
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.content.Intent
@@ -12,11 +10,12 @@ import android.util.Log
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.animation.doOnEnd
+import com.bankapp.session.SessionManager
 
 class SplashActivity : AppCompatActivity() {
 
     private lateinit var tvTitle: TextView
+    private lateinit var sessionManager: SessionManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,13 +26,24 @@ class SplashActivity : AppCompatActivity() {
         
         tvTitle = findViewById(R.id.tvSplashTitle)
         
+        sessionManager = SessionManager(this)
+        
         startAnimations()
         
         Handler(Looper.getMainLooper()).postDelayed({
-            Log.d("Splash", "---2---")
+            Log.d("Splash", "sesion init---r---")
             
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
+            if (sessionManager.isSessionValid()) {
+                Log.d("Splash", "sesion init---a1---")
+                val intent = Intent(this, MainActivity::class.java)
+                intent.putExtra("loadHome", true)
+                startActivity(intent)
+            } else {
+                Log.d("Splash", "sesion init---a2---")
+                val intent = Intent(this, MainActivity::class.java)
+                intent.putExtra("loadLogin", true)
+                startActivity(intent)
+            }
             finish()
         }, 2500) 
     }
