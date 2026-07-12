@@ -57,7 +57,7 @@ object KeystoreManager {
     }
 
     private fun createKey(): SecretKey {
-        Log.d("Keystore", "-generando nueva clav")
+        Log.d("Keystore", "--generando nueva clav")
         
         val keyGenerator = KeyGenerator.getInstance(
             KeyProperties.KEY_ALGORITHM_AES,
