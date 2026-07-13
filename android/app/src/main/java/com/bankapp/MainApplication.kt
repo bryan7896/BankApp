@@ -20,20 +20,25 @@ import com.facebook.soloader.SoLoader
 
 class MainApplication : Application(), ReactApplication {
 
+  private val bridgePackage = object : ReactPackage {
+    override fun createNativeModules(reactContext: ReactApplicationContext): List<NativeModule> {
+      Log.d("App", "--- registrando RNBridgeModule ---")
+      return listOf(RNBridgeModule(reactContext, SessionManager(reactContext)))
+    }
+    override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>> {
+      return emptyList()
+    }
+  }
+
+  private val allPackages: List<ReactPackage> by lazy {
+    PackageList(this).packages.apply {
+      add(bridgePackage)
+    }
+  }
+
   override val reactNativeHost: ReactNativeHost =
       object : DefaultReactNativeHost(this) {
-        override fun getPackages(): List<ReactPackage> =
-            PackageList(this).packages.apply {
-              add(object : ReactPackage {
-                override fun createNativeModules(reactContext: ReactApplicationContext): List<NativeModule> {
-                  Log.d("App", "--- registrando RNBridgeModule ---")
-                  return listOf(RNBridgeModule(reactContext, SessionManager(reactContext)))
-                }
-                override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>> {
-                  return emptyList()
-                }
-              })
-            }
+        override fun getPackages(): List<ReactPackage> = allPackages
 
         override fun getJSMainModuleName(): String = "index"
 
@@ -45,6 +50,8 @@ class MainApplication : Application(), ReactApplication {
 
   override val reactHost: ReactHost
     get() = getDefaultReactHost(applicationContext, reactNativeHost)
+
+  fun getReactPackages(): List<ReactPackage> = allPackages
 
   override fun onCreate() {
     super.onCreate()
