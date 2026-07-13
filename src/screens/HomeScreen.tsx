@@ -5,14 +5,20 @@ import { NativeModules } from 'react-native';
 const { BankBridge } = NativeModules;
 
 const HomeScreen = (props: any) => {
-    const userName = props.userName || 'Usuario';  
+    const userName = props.userName || 'Usuario';
     const balance = props.balance || '0';
 
-    console.log('arams', props);
-
     const handleLogout = () => {
-        BankBridge.performLogout(); 
+        BankBridge.performLogout();
         Alert.alert('Éxito', 'Sesión cerrada');
+    };
+
+    const handleTransfer = () => {
+        BankBridge.navigateToTransfer();
+    };
+
+    const handleMovements = () => {
+        BankBridge.navigateToMovements();
     };
 
     return (
@@ -30,11 +36,11 @@ const HomeScreen = (props: any) => {
             </View>
 
             <View style={styles.menu}>
-                <TouchableOpacity style={styles.menuItem}>
+                <TouchableOpacity style={styles.menuItem} onPress={handleTransfer}>
                     <Text style={styles.menuText}>Transferir</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.menuItem}>
+                <TouchableOpacity style={styles.menuItem} onPress={handleMovements}>
                     <Text style={styles.menuText}>Movimientos</Text>
                 </TouchableOpacity>
             </View>
@@ -54,7 +60,8 @@ const styles = StyleSheet.create({
     },
     welcome: {
         fontSize: 20,
-        fontWeight: 'bold'
+        fontWeight: 'bold',
+        color: '#333'
     },
     logout: { color: '#e74c3c' },
     balanceCard: {
@@ -75,7 +82,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff', padding: 15,
         borderRadius: 8, marginBottom: 10
     },
-    menuText: { fontSize: 16 },
+    menuText: { fontSize: 16, color: '#333' },
 });
 
 export default HomeScreen;

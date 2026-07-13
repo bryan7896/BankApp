@@ -61,4 +61,25 @@ class RNBridgeModule(
             MainActivity.instance?.loadLogin()
         }
     }
+
+    @ReactMethod
+    fun navigateToTransfer() {
+        reactContext.runOnUiQueueThread {
+            MainActivity.instance?.loadTransfer()
+        }
+    }
+
+    @ReactMethod
+    fun navigateToMovements() {
+        reactContext.runOnUiQueueThread {
+            MainActivity.instance?.loadMovements()
+        }
+    }
+
+    @ReactMethod
+    fun goBackToHome() {
+        reactContext.runOnUiQueueThread {
+            MainActivity.instance?.loadHome()
+        }
+    }
 }

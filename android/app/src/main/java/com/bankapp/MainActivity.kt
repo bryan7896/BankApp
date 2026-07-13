@@ -73,6 +73,24 @@ class MainActivity : ReactActivity() {
         loadBundle("home", props)
     }
 
+    fun loadTransfer() {
+        Log.d("Main", "--- loadTransfer ---")
+        val session = sessionManager.getSession()
+        val props = Bundle().apply {
+            putString("balance", session?.balance ?: "0")
+            putString("userName", session?.userName ?: "")
+        }
+        loadBundle("transfer", props)
+    }
+
+    fun loadMovements() {
+        Log.d("Main", "--- loadMovements ---")
+        val session = sessionManager.getSession()
+        val props = Bundle().apply {
+            putString("userId", session?.userId ?: "")
+        }
+        loadBundle("movements", props)
+    }
     private fun loadBundle(bundleName: String, props: Bundle?) {
         Log.d("Main", "--- cargando $bundleName ---")
 
