@@ -15,7 +15,14 @@ class RNBridgeModule(
 
     @ReactMethod
     fun getSession(callback: Callback) {
-        Log.d("Bridge", "--- getSession ---")
+        if (!sessionManager.isSessionValid()) {
+            reactContext.runOnUiQueueThread {
+                MainActivity.instance?.loadLogin()
+            }
+            callback.invoke(false, null)
+            return
+        }
+        
         val session = sessionManager.getSession()
         if (session == null) {
             callback.invoke(false, null)
@@ -40,11 +47,10 @@ class RNBridgeModule(
                 userName = json.getString("userName"),
                 phone = json.getString("phone"),
                 balance = json.getString("balance"),
-                expiration = System.currentTimeMillis() + (30 * 60 * 1000)
+                expiration = System.currentTimeMillis() + (2 * 60 * 1000)
             )
             sessionManager.saveSession(session)
 
-            // Cambiar al bundle de Home en el hilo principal
             reactContext.runOnUiQueueThread {
                 MainActivity.instance?.loadHome()
             }
@@ -64,6 +70,13 @@ class RNBridgeModule(
 
     @ReactMethod
     fun navigateToTransfer() {
+        if (!sessionManager.isSessionValid()) {
+            reactContext.runOnUiQueueThread {
+                MainActivity.instance?.loadLogin()
+            }
+            return
+        }
+        
         reactContext.runOnUiQueueThread {
             MainActivity.instance?.loadTransfer()
         }
@@ -71,6 +84,13 @@ class RNBridgeModule(
 
     @ReactMethod
     fun navigateToMovements() {
+        if (!sessionManager.isSessionValid()) {
+            reactContext.runOnUiQueueThread {
+                MainActivity.instance?.loadLogin()
+            }
+            return
+        }
+        
         reactContext.runOnUiQueueThread {
             MainActivity.instance?.loadMovements()
         }
@@ -78,6 +98,13 @@ class RNBridgeModule(
 
     @ReactMethod
     fun goBackToHome() {
+        if (!sessionManager.isSessionValid()) {
+            reactContext.runOnUiQueueThread {
+                MainActivity.instance?.loadLogin()
+            }
+            return
+        }
+        
         reactContext.runOnUiQueueThread {
             MainActivity.instance?.loadHome()
         }

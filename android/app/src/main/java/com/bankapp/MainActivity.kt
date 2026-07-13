@@ -23,6 +23,7 @@ class MainActivity : ReactActivity() {
     private lateinit var sessionManager: SessionManager
     private var reactInstanceManager: ReactInstanceManager? = null
     private var reactRootView: ReactRootView? = null
+    private var currentBundle: String = ""
 
     override fun getMainComponentName(): String = "BankApp"
 
@@ -51,6 +52,14 @@ class MainActivity : ReactActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (!sessionManager.isSessionValid()) {
+            Log.d("Main", "--- sesion expired, cargando Login ---")
+            loadLogin()
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         instance = null
@@ -59,7 +68,7 @@ class MainActivity : ReactActivity() {
     }
 
     fun loadLogin() {
-        Log.d("Main", "--- loadLogin--")
+        currentBundle = "login"
         loadBundle("login", null)
     }
 
@@ -70,6 +79,7 @@ class MainActivity : ReactActivity() {
             putString("userName", session?.userName ?: "")
             putString("balance", session?.balance ?: "0")
         }
+        currentBundle = "home"
         loadBundle("home", props)
     }
 
@@ -80,6 +90,7 @@ class MainActivity : ReactActivity() {
             putString("balance", session?.balance ?: "0")
             putString("userName", session?.userName ?: "")
         }
+        currentBundle = "transfer"
         loadBundle("transfer", props)
     }
 
@@ -89,8 +100,10 @@ class MainActivity : ReactActivity() {
         val props = Bundle().apply {
             putString("userId", session?.userId ?: "")
         }
+        currentBundle = "movements"
         loadBundle("movements", props)
     }
+
     private fun loadBundle(bundleName: String, props: Bundle?) {
         Log.d("Main", "--- cargando $bundleName ---")
 

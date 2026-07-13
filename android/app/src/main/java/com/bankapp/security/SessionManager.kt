@@ -86,21 +86,22 @@ class SessionManager(private val context: Context) {
     }
 
     fun isSessionValid(): Boolean {
+        Log.d("Session", "--- validando sesion ---")
         
         val session = getSession()
         if (session == null) {
-            Log.w("Session", "---no hay sesion-")
+            Log.w("Session", "--- no hay sesion para validar ---")
             return false
         }
 
         val now = System.currentTimeMillis()
         val isValid = now < session.expiration
         
-        Log.d("Session", "--isValid = $isValid ---")
-        Log.d("Session", "--timout: ${(session.expiration - now) / 60000} -")
+        Log.d("Session", "--- sesion valida: $isValid ---")
+        Log.d("Session", "--- expira en: ${(session.expiration - now) / 60000} min ---")
         
         if (!isValid) {
-            Log.w("Session", "--s expirao ---")
+            Log.w("Session", "--- sesion expirada ---")
             clearSession()
         }
         
