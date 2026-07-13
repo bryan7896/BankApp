@@ -51,38 +51,51 @@ const HomeScreen = (props: any) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 20, backgroundColor: '#f5f5f5'
+        padding: 20,
+        backgroundColor: '#f5f5f5',
     },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginTop: 20
+        marginTop: 20,
     },
     welcome: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: '#333'
+        color: '#333',
     },
-    logout: { color: '#e74c3c' },
+    logout: {
+        color: '#e74c3c',
+    },
     balanceCard: {
-        backgroundColor: '#1A5276', padding: 20,
-        borderRadius: 12, marginTop: 20
+        backgroundColor: '#1A5276',
+        padding: 20,
+        borderRadius: 12,
+        marginTop: 20,
     },
     balanceLabel: {
         color: '#ECF0F1',
-        fontSize: 14
+        fontSize: 14,
     },
     balanceAmount: {
-        color: '#fff', fontSize: 28,
+        color: '#fff',
+        fontSize: 28,
         fontWeight: 'bold',
-        marginTop: 5
+        marginTop: 5,
     },
-    menu: { marginTop: 30 },
+    menu: {
+        marginTop: 30,
+    },
     menuItem: {
-        backgroundColor: '#fff', padding: 15,
-        borderRadius: 8, marginBottom: 10
+        backgroundColor: '#fff',
+        padding: 15,
+        borderRadius: 8,
+        marginBottom: 10,
     },
-    menuText: { fontSize: 16, color: '#333' },
+    menuText: {
+        fontSize: 16,
+        color: '#333',
+    },
 });
 
 export default HomeScreen;

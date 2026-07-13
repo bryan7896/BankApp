@@ -23,8 +23,14 @@ const TransferScreen = (props: any) => {
             return;
         }
 
-        if (parseFloat(amount) <= 0) {
+        const amountNum = parseFloat(amount);
+        if (amountNum <= 0) {
             Alert.alert('Error', 'El monto debe ser mayor a cero');
+            return;
+        }
+
+        if (amountNum > parseFloat(balance)) {
+            Alert.alert('Error', 'Saldo insuficiente');
             return;
         }
 
@@ -39,16 +45,21 @@ const TransferScreen = (props: any) => {
                         body: JSON.stringify({
                             sessionId: session.sessionId,
                             toPhone: phone,
-                            amount: parseFloat(amount),
+                            amount: amountNum,
                         }),
                     })
                     .then(res => res.json())
                     .then(data => {
                         if (data.success) {
                             Alert.alert('Éxito', 'Transferencia realizada');
+                            BankBridge.updateBalance(String(data.newBalance));
                             BankBridge.goBackToHome();
                         } else {
-                            Alert.alert('Error', data.message);
+                            if (data.message.includes('Saldo insuficiente')) {
+                                Alert.alert('Error', 'Saldo insuficiente para realizar esta transferencia');
+                            } else {
+                                Alert.alert('Error', data.message);
+                            }
                         }
                     })
                     .catch(err => {

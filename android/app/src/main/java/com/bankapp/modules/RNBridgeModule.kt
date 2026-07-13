@@ -83,6 +83,11 @@ class RNBridgeModule(
     }
 
     @ReactMethod
+    fun updateBalance(newBalance: String) {
+        sessionManager.updateBalance(newBalance)
+    }
+
+    @ReactMethod
     fun navigateToMovements() {
         if (!sessionManager.isSessionValid()) {
             reactContext.runOnUiQueueThread {
