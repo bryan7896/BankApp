@@ -7,9 +7,7 @@ import {
     Alert,
     StyleSheet,
 } from 'react-native';
-import { NativeModules } from 'react-native';
-
-const { BankBridge } = NativeModules;
+import { sendToNative } from '../native/eventBridge';
 
 
 const LoginScreen = () => {
@@ -43,7 +41,7 @@ const LoginScreen = () => {
                     balance: String(data.balance),
                 };
 
-                BankBridge.loginSuccess(JSON.stringify(eventData));
+                sendToNative('LOGIN_SUCCESS', JSON.stringify(eventData));
             } else {
                 Alert.alert('Error', data.message || 'Credenciales inválidas');
             }

@@ -9,8 +9,10 @@ import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
 import com.facebook.react.ReactInstanceManager
 import com.facebook.react.ReactRootView
+import com.facebook.react.bridge.ReactContext
 import com.facebook.react.common.LifecycleState
 import com.facebook.react.defaults.DefaultReactActivityDelegate
+import com.facebook.react.modules.core.DeviceEventManagerModule
 import org.json.JSONObject
 
 class MainActivity : ReactActivity() {
@@ -32,9 +34,7 @@ class MainActivity : ReactActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        instance = this  
-
-        Log.d("Main", "--onCreate --a")
+        instance = this
 
         sessionManager = SessionManager(this)
 
@@ -52,14 +52,6 @@ class MainActivity : ReactActivity() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        if (!sessionManager.isSessionValid()) {
-            Log.d("Main", "--- sesion expired, cargando Login ---")
-            loadLogin()
-        }
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         instance = null
@@ -73,34 +65,33 @@ class MainActivity : ReactActivity() {
     }
 
     fun loadHome() {
-        Log.d("Main", "-- loadHome ---")
-        val session = sessionManager.getSession()
-        val props = Bundle().apply {
-            putString("userName", session?.userName ?: "")
-            putString("balance", session?.balance ?: "0")
-        }
         currentBundle = "home"
-        loadBundle("home", props)
+        loadBundle("home", null)
+
+        val session = sessionManager.getSession()
+        val payload = JSONObject().apply {
+            put("userName", session?.userName ?: "")
+            put("balance", session?.balance ?: "0")
+        }.toString()
+
+        emitToJS("LOAD_HOME", payload)
     }
 
     fun loadTransfer() {
-        Log.d("Main", "--- loadTransfer ---")
+        currentBundle = "transfer"
         val session = sessionManager.getSession()
         val props = Bundle().apply {
             putString("balance", session?.balance ?: "0")
-            putString("userName", session?.userName ?: "")
         }
-        currentBundle = "transfer"
         loadBundle("transfer", props)
     }
 
     fun loadMovements() {
-        Log.d("Main", "--- loadMovements ---")
+        currentBundle = "movements"
         val session = sessionManager.getSession()
         val props = Bundle().apply {
             putString("userId", session?.userId ?: "")
         }
-        currentBundle = "movements"
         loadBundle("movements", props)
     }
 
@@ -131,5 +122,79 @@ class MainActivity : ReactActivity() {
         rootView.startReactApplication(instanceManager, bundleName, props)
 
         container.addView(rootView)
+    }
+
+    private fun emitToJS(eventName: String, data: String?) {
+        val manager = reactInstanceManager ?: return
+        val context = manager.currentReactContext
+
+        if (context != null) {
+            sendDeviceEvent(context, eventName, data)
+        } else {
+            manager.addReactInstanceEventListener(object : ReactInstanceManager.ReactInstanceEventListener {
+                override fun onReactContextInitialized(reactContext: ReactContext) {
+                    sendDeviceEvent(reactContext, eventName, data)
+                    manager.removeReactInstanceEventListener(this)
+                }
+            })
+        }
+    }
+
+    private fun sendDeviceEvent(context: ReactContext, eventName: String, data: String?) {
+        context
+            .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+            .emit(eventName, data)
+    }
+
+    fun notifySessionExpired() {
+        emitToJS("SESSION_EXPIRED", null)
+    }
+
+    fun onRNEvent(eventName: String, data: String?) {
+        Log.d("Main", "--- event: $eventName ---")
+
+        when (eventName) {
+            "LOGIN_SUCCESS" -> {
+                data?.let {
+                    try {
+                        val json = JSONObject(it)
+                        val session = Session(
+                            sessionId = json.getString("sessionId"),
+                            userId = json.getString("userId"),
+                            userName = json.getString("userName"),
+                            phone = json.getString("phone"),
+                            balance = json.getString("balance"),
+                            expiration = System.currentTimeMillis() + (2 * 60 * 1000)
+                        )
+                        sessionManager.saveSession(session)
+                        loadHome()
+                    } catch (e: Exception) {
+                        Log.e("Main", "--- error LOGIN_SUCCESS: ${e.message} ---")
+                    }
+                }
+            }
+            "OPEN_TRANSFER" -> loadTransfer()
+            "OPEN_MOVEMENTS" -> loadMovements()
+            "TRANSFER_SUCCESS" -> {
+                data?.let {
+                    try {
+                        val json = JSONObject(it)
+                        val newBalance = json.optString("newBalance", null)
+                        if (newBalance != null) {
+                            sessionManager.updateBalance(newBalance)
+                        }
+                    } catch (e: Exception) {
+                        Log.e("Main", "--- error TRANSFER_SUCCESS: ${e.message} ---")
+                    }
+                }
+                loadHome()
+            }
+            "LOGOUT" -> {
+                sessionManager.clearSession()
+                loadLogin()
+            }
+            "GO_BACK" -> loadHome()
+            else -> Log.w("Main", "--- evento no manejado: $eventName ---")
+        }
     }
 }

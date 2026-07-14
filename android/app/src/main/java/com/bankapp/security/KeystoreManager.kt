@@ -71,6 +71,7 @@ object KeystoreManager {
             .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
             .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
             .setKeySize(256)
+            .setUserAuthenticationRequired(false)
             .build()
 
         keyGenerator.init(keyGenParameterSpec)

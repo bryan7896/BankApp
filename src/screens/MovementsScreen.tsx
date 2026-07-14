@@ -9,6 +9,8 @@ import {
     ActivityIndicator,
 } from 'react-native';
 import { NativeModules } from 'react-native';
+import { sendToNative } from '../native/eventBridge';
+import { listenFromNative } from '../native/eventBridge';
 
 const { BankBridge } = NativeModules;
 
@@ -18,6 +20,14 @@ const MovementsScreen = () => {
 
     useEffect(() => {
         loadMovements();
+    }, []);
+
+    useEffect(() => {
+        const sub = listenFromNative('SESSION_EXPIRED', () => {
+            Alert.alert('Sesión expirada', 'Por favor inicia sesión nuevamente');
+            sendToNative('LOGOUT');
+        });
+        return () => sub.remove();
     }, []);
 
     const loadMovements = () => {
@@ -113,7 +123,7 @@ const MovementsScreen = () => {
 
             <TouchableOpacity
                 style={styles.backButton}
-                onPress={() => BankBridge.goBackToHome()}
+                onPress={() => sendToNative('GO_BACK')}
             >
                 <Text style={styles.backText}>Volver</Text>
             </TouchableOpacity>

@@ -1,24 +1,34 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { NativeModules } from 'react-native';
-
-const { BankBridge } = NativeModules;
+import React, { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { sendToNative, listenFromNative } from '../native/eventBridge';
 
 const HomeScreen = (props: any) => {
-    const userName = props.userName || 'Usuario';
-    const balance = props.balance || '0';
+    const [userName, setUserName] = useState(props.userName || 'Usuario');
+    const [balance, setBalance] = useState(props.balance || '0');
+
+    useEffect(() => {
+        const subscription = listenFromNative('LOAD_HOME', (data: string) => {
+            try {
+                const parsed = JSON.parse(data);
+                setUserName(parsed.userName || 'Usuario');
+                setBalance(parsed.balance || '0');
+            } catch (e) {
+                console.log('LOAD_HOME parse error', e);
+            }
+        });
+        return () => subscription.remove();
+    }, []);
 
     const handleLogout = () => {
-        BankBridge.performLogout();
-        Alert.alert('Éxito', 'Sesión cerrada');
+        sendToNative('LOGOUT');
     };
 
     const handleTransfer = () => {
-        BankBridge.navigateToTransfer();
+        sendToNative('OPEN_TRANSFER');
     };
 
     const handleMovements = () => {
-        BankBridge.navigateToMovements();
+        sendToNative('OPEN_MOVEMENTS');
     };
 
     return (

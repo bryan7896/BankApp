@@ -43,13 +43,16 @@ class SessionManager(private val context: Context) {
 
     fun saveSession(session: Session) {
         Log.d("Session", "---saave 3---")
+        Log.d("Session", "--- balance ANTES ${session.balance} ---")
+        val encryptedBalance = EncryptionManager.encrypt(session.balance) ?: session.balance
+        Log.d("Session", "--- balance DESPUES $encryptedBalance ---")
         
         with(sharedPrefs.edit()) {
             putString(KEY_SESSION_ID, session.sessionId)
             putString(KEY_USER_ID, session.userId)
             putString(KEY_USER_NAME, session.userName)
             putString(KEY_PHONE, session.phone)
-            putString(KEY_BALANCE, session.balance)
+            putString(KEY_BALANCE, encryptedBalance)  
             putLong(KEY_EXPIRATION, session.expiration)
             apply()
         }
@@ -65,7 +68,7 @@ class SessionManager(private val context: Context) {
         val userId = sharedPrefs.getString(KEY_USER_ID, null)
         val userName = sharedPrefs.getString(KEY_USER_NAME, null)
         val phone = sharedPrefs.getString(KEY_PHONE, null)
-        val balance = sharedPrefs.getString(KEY_BALANCE, null)
+        val encryptedBalance = sharedPrefs.getString(KEY_BALANCE, null)
         val expiration = sharedPrefs.getLong(KEY_EXPIRATION, 0)
 
         if (sessionId == null || userId == null) {
@@ -73,6 +76,12 @@ class SessionManager(private val context: Context) {
             return null
         }
 
+        val decryptedBalance = if (encryptedBalance != null && encryptedBalance.length > 10) {
+            EncryptionManager.decrypt(encryptedBalance) ?: "0"
+        } else {
+            encryptedBalance ?: "0"
+        }
+        
         Log.d("Session", "--- sesion de $userName ---")
         
         return Session(
@@ -80,7 +89,7 @@ class SessionManager(private val context: Context) {
             userId = userId,
             userName = userName ?: "",
             phone = phone ?: "",
-            balance = balance ?: "",
+            balance = decryptedBalance,
             expiration = expiration
         )
     }

@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState , useEffect} from 'react';
 import {
     View,
     Text,
     TextInput,
     TouchableOpacity,
     Alert,
-    StyleSheet,
+    StyleSheet, 
 } from 'react-native';
 import { NativeModules } from 'react-native';
+import { sendToNative } from '../native/eventBridge';
+import { listenFromNative } from '../native/eventBridge';
 
 const { BankBridge } = NativeModules;
 
@@ -16,6 +18,14 @@ const TransferScreen = (props: any) => {
     const [amount, setAmount] = useState('');
     const [loading, setLoading] = useState(false);
     const balance = props.balance || '0';
+
+    useEffect(() => {
+        const sub = listenFromNative('SESSION_EXPIRED', () => {
+            Alert.alert('Sesión expirada', 'Por favor inicia sesión nuevamente');
+            sendToNative('LOGOUT');
+        });
+        return () => sub.remove();
+    }, []);
 
     const handleTransfer = async () => {
         if (!phone || !amount) {
@@ -52,8 +62,7 @@ const TransferScreen = (props: any) => {
                     .then(data => {
                         if (data.success) {
                             Alert.alert('Éxito', 'Transferencia realizada');
-                            BankBridge.updateBalance(String(data.newBalance));
-                            BankBridge.goBackToHome();
+                            sendToNative('TRANSFER_SUCCESS', JSON.stringify({ newBalance: data.newBalance }));
                         } else {
                             if (data.message.includes('Saldo insuficiente')) {
                                 Alert.alert('Error', 'Saldo insuficiente para realizar esta transferencia');
@@ -112,7 +121,7 @@ const TransferScreen = (props: any) => {
 
             <TouchableOpacity
                 style={styles.backButton}
-                onPress={() => BankBridge.goBackToHome()}
+                onPress={() => sendToNative('GO_BACK')}
             >
                 <Text style={styles.backText}>Volver</Text>
             </TouchableOpacity>
